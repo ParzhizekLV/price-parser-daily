@@ -70,13 +70,20 @@ def parse_prices_from_csv(input_csv):
                     urls.append(url)
                     products.append(col)
 
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:122.0) Gecko/20100101 Firefox/122.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "ru,en-US;q=0.7,en;q=0.3",
+        "Referer": "https://www.google.com/",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1"
+    }
+
     results = []
     for product, url in zip(products, urls):
         domain = get_domain(url)
         try:
-            response = requests.get(url, timeout=10, headers={
-                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
-            })
+            response = requests.get(url, timeout=10, headers=headers)
             response.raise_for_status()
             price = extract_price_from_html(response.text, domain)
             results.append([domain, product, price if price else "Не найдено", url])
