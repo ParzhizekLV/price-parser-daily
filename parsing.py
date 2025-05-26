@@ -90,6 +90,7 @@ def save_to_google_sheet(data):
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
     credentials_json = os.environ["GOOGLE_CREDENTIALS"]
     credentials_dict = json.loads(credentials_json)
+    credentials_dict["private_key"] = credentials_dict["private_key"].replace("\\n", "\n")
     creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
     client = gspread.authorize(creds)
     sheet = client.open_by_key(SPREADSHEET_ID).sheet1
