@@ -3,7 +3,8 @@ import requests
 from bs4 import BeautifulSoup
 import re
 from urllib.parse import urlparse
-import time
+import os
+import json
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
@@ -81,21 +82,19 @@ def parse_prices_from_csv(input_csv):
             results.append([domain, product, price if price else "Не найдено", url])
         except Exception as e:
             results.append([domain, product, f"Ошибка: {str(e)}", url])
-        # Удалили time.sleep(1) для ускорения работы на PythonAnywhere
 
     return results
 
 # Сохранение в Google Sheets
 def save_to_google_sheet(data):
     scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-    creds = ServiceAccountCredentials.from_json_keyfile_name("credentials.json", scope)
+    credentials_json = os.environ["GOOGLE_CREDENTIALS"]
+    credentials_dict = json.loads(credentials_json)
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(credentials_dict, scope)
     client = gspread.authorize(creds)
     sheet = client.open_by_key(SPREADSHEET_ID).sheet1
 
-    # Очистить таблицу перед записью
     sheet.clear()
-
-    # Записать всё одной операцией
     sheet.update(values=[["Сайт", "Товар", "Цена (₽)", "Ссылка"]] + data, range_name='A1')
 
 if __name__ == "__main__":
